@@ -14,6 +14,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import normalize
 
+from .explain import blend_fingerprint, explain_recommendations, liked_profile
+
 
 class UnknownMovieError(ValueError):
     pass
@@ -73,7 +75,7 @@ def recommend_blend(
     skipped_titles: list[str] | None = None,
     top_n: int = 5,
     skip_weight: float = 0.45,
-) -> list[dict[str, Any]]:
+) -> dict[str, Any]:
     movies = catalog["movies"]
     matrix = catalog["matrix"]
     liked_idx = movie_indices(movies, liked_titles)
@@ -100,4 +102,8 @@ def recommend_blend(
                 "release_year": int(row["release_year"]),
             }
         )
-    return results
+    explained = explain_recommendations(catalog, results, liked_titles)
+    return {
+        "picks": explained,
+        "fingerprint": blend_fingerprint(liked_profile(movies, liked_titles)),
+    }

@@ -1,6 +1,9 @@
 *.pkl
-tmdb_5000_credits.csv
-tmdb_5000_movies.csv
-artifacts/
 __pycache__/
 .ipynb_checkpoints/
+
+# Source dumps and built catalog stay local
+data/raw/*.csv
+tmdb_5000_credits.csv
+tmdb_5000_movies.csv
+artifacts/*.pkl

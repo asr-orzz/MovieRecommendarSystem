@@ -23,12 +23,7 @@ from scipy import sparse
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import normalize
 
-ARTIFACT_DIR = Path("artifacts")
-CATALOG_PATH = ARTIFACT_DIR / "catalog.pkl"
-
-DATA_DIR = Path(".")
-MOVIES_CSV = DATA_DIR / "tmdb_5000_movies.csv"
-CREDITS_CSV = DATA_DIR / "tmdb_5000_credits.csv"
+from .paths import CATALOG_PATH, CREDITS_CSV, MOVIES_CSV
 
 MOVIE_MIRRORS = [
     "https://raw.githubusercontent.com/PinkWink/ML_tutorial/master/dataset/tmdb_5000_movies.csv",

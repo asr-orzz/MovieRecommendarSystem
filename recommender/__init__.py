@@ -1,10 +1,12 @@
 """Content-based movie engine with blendable Taste DNA vectors."""
 
 from .explain import blend_fingerprint, explain_recommendations
+from .nights import NIGHT_LABELS
 from .pipeline import build_catalog, load_catalog, save_catalog
 from .taste import UnknownMovieError, recommend_blend
 
 __all__ = [
+    "NIGHT_LABELS",
     "UnknownMovieError",
     "blend_fingerprint",
     "build_catalog",

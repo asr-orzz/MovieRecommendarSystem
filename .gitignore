@@ -1,6 +1,7 @@
 *.pkl
 __pycache__/
 .ipynb_checkpoints/
+.env
 
 # Source dumps and built catalog stay local
 data/raw/*.csv

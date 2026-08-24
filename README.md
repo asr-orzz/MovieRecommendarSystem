@@ -1,43 +1,47 @@
-# movie-recommender-system-tmdb-dataset
-A content based movie recommender system using cosine similarity
-Here is the content formatted for a `README.md` file for your GitHub project:
+# Taste DNA Movie Recommender
 
-```markdown
-# Movie Recommender System
+Content-based movie recommendations with a twist: you blend several movies you love (and can subtract one you do not), then the app shows a **Taste DNA** fingerprint and a **because** line for every pick.
 
-This repository contains a Movie Recommender System built using collaborative filtering techniques.
+This is not collaborative filtering. It is bag-of-words vectors from TMDB metadata (genres, top cast, directors, keywords, overview), CountVectorizer, and cosine similarity. Movie vectors are L2-normalized so a user taste query is just an average — like word2vec arithmetic:
 
-## Setup Instructions
+`Avatar + Inception − The Notebook`
 
-### 1. Clone the repository
-To get started, clone the repository to your local machine:
+## Why it is different
 
-```bash
-git clone https://github.com/Tisha729/Movie_Recommender_Sytstem
-```
+- **Taste Blend** — multi-movie user vector, optional skip
+- **Because cards** — shared director, cast, genres, and plot tags
+- **Watch-night controls** — Intense / Brainy / Comfort, plus hidden gems vs crowd-pleasers
 
-### 2. Generate the `similarity.pkl` file
-To generate the `similarity.pkl` file, you need to run the `project.ipynb` notebook. This will create the `similarity.pkl` file required for the recommendation system to function.
+## Setup
 
 ```bash
-# Open project.ipynb in Jupyter Notebook or JupyterLab and execute all cells to create similarity.pkl
+pip install -r requirements.txt
+python scripts/build_catalog.py
 ```
 
-### 3. Install dependencies for the Frontend
-For the frontend, we use Streamlit. To install Streamlit, run the following command:
+The builder downloads the TMDB 5000 CSVs into `data/raw/` (if they are missing) and writes `artifacts/catalog.pkl`.
+
+Posters need a free TMDB API key. Copy `.env.example` to `.env` and add your key from [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api):
 
 ```bash
-pip install streamlit
+TMDB_API_KEY=your_tmdb_api_key_here
 ```
 
-### 4. Running the Frontend
-Once Streamlit is installed, you can run the frontend by executing:
+## Run
 
 ```bash
 python -m streamlit run app.py
 ```
 
-This will start the Streamlit app in your browser, and you can interact with the movie recommender system.
-```
+Pick 1–5 movies you loved, optionally skip a vibe, choose the night, then hit **BLEND TASTE**.
 
-You can copy and paste this directly into your `README.md` file on GitHub.
+## Project layout
+
+```text
+app.py                 Streamlit UI
+recommender/           blend, explain, night steering, catalog pipeline
+scripts/build_catalog.py
+notebooks/project.ipynb   original feature-engineering notebook
+data/raw/              TMDB CSVs (gitignored)
+artifacts/             catalog.pkl (gitignored)
+```

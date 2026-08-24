@@ -15,6 +15,7 @@ import pandas as pd
 from sklearn.preprocessing import normalize
 
 from .explain import blend_fingerprint, explain_recommendations, liked_profile
+from .nights import apply_discovery, apply_night_bonus, steer_query
 
 
 class UnknownMovieError(ValueError):
@@ -75,13 +76,18 @@ def recommend_blend(
     skipped_titles: list[str] | None = None,
     top_n: int = 5,
     skip_weight: float = 0.45,
+    night: str = "balanced",
+    discovery: float = 0.0,
 ) -> dict[str, Any]:
     movies = catalog["movies"]
     matrix = catalog["matrix"]
     liked_idx = movie_indices(movies, liked_titles)
     skipped_idx = movie_indices(movies, skipped_titles or [])
     query = blend_vectors(matrix, liked_idx, skipped_idx, skip_weight)
+    query = steer_query(query, catalog.get("feature_names"), night)
     scores = score_catalog(matrix, query, set(liked_idx) | set(skipped_idx))
+    scores = apply_night_bonus(scores, movies, night)
+    scores = apply_discovery(scores, movies, discovery)
 
     results: list[dict[str, Any]] = []
     for idx, score in top_indices(scores, top_n):
@@ -106,4 +112,6 @@ def recommend_blend(
     return {
         "picks": explained,
         "fingerprint": blend_fingerprint(liked_profile(movies, liked_titles)),
+        "night": night,
+        "discovery": discovery,
     }

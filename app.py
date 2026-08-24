@@ -4,9 +4,12 @@ import os
 import requests
 import streamlit as st
 
-from recommender.paths import CATALOG_PATH
+from recommender.nights import NIGHT_LABELS
+from recommender.paths import CATALOG_PATH, load_env
 from recommender.pipeline import load_catalog
 from recommender.taste import recommend_blend
+
+load_env()
 
 st.set_page_config(
     page_title="Taste DNA · Movie Recommender",
@@ -162,7 +165,9 @@ def get_catalog():
 
 @st.cache_data(show_spinner=False)
 def fetch_poster(movie_id: int) -> str:
-    api_key = os.getenv("TMDB_API_KEY", "a3621261801a2d177e73f71a8987d9df")
+    api_key = os.getenv("TMDB_API_KEY", "").strip()
+    if not api_key:
+        return "https://via.placeholder.com/500x750?text=No+Poster"
     try:
         response = requests.get(
             f"https://api.themoviedb.org/3/movie/{movie_id}",
@@ -255,6 +260,33 @@ skipped = st.selectbox(
     label_visibility="collapsed",
 )
 
+st.markdown('<p class="section-label">What kind of night is it?</p>', unsafe_allow_html=True)
+night_keys = list(NIGHT_LABELS.keys())
+night = st.radio(
+    "Watch night",
+    night_keys,
+    index=0,
+    format_func=lambda key: NIGHT_LABELS[key],
+    horizontal=True,
+    label_visibility="collapsed",
+)
+
+st.markdown('<p class="section-label">Discovery</p>', unsafe_allow_html=True)
+discovery = st.slider(
+    "Discovery",
+    min_value=-1.0,
+    max_value=1.0,
+    value=0.0,
+    step=0.25,
+    format="%+0.2f",
+    help="Left: hidden gems. Right: crowd-pleasers.",
+    label_visibility="collapsed",
+)
+st.caption("Hidden gems ←  → Crowd-pleasers")
+
+if not os.getenv("TMDB_API_KEY", "").strip():
+    st.caption("Posters need a TMDB_API_KEY in a local .env file. Copy .env.example to get started.")
+
 center = st.columns([1, 1, 1])
 with center[1]:
     discover = st.button("BLEND TASTE")
@@ -270,9 +302,21 @@ if discover:
                 liked_titles=liked,
                 skipped_titles=skipped_titles,
                 top_n=5,
+                night=night,
+                discovery=discovery,
             )
         render_fingerprint(bundle["fingerprint"])
-        st.markdown('<h3 class="rec-title">Because of your blend</h3>', unsafe_allow_html=True)
+        night_label = NIGHT_LABELS.get(bundle["night"], "Balanced")
+        if bundle["discovery"] < -0.1:
+            mix = "leaning hidden gems"
+        elif bundle["discovery"] > 0.1:
+            mix = "leaning crowd-pleasers"
+        else:
+            mix = "balanced discovery"
+        st.markdown(
+            f'<h3 class="rec-title">Because of your blend · {night_label} · {mix}</h3>',
+            unsafe_allow_html=True,
+        )
         cols = st.columns(5)
         for i, pick in enumerate(bundle["picks"]):
             with cols[i]:
